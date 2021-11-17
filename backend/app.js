@@ -4,6 +4,9 @@ const express = require('express');
 //importation mongoose
 const mongoose = require('mongoose');
 
+//importation path qui donne le chemin
+const path = require('path');
+
 //importation userRoutes
 const userRoutes = require('./routes/user');
 
@@ -31,7 +34,13 @@ app.use((req, res, next) => {
     next();
 });
 
+//middleware qui répond aux requêtes envoyées à /images et qui sert le dossier static image
+app.use("/images", express.static(path.join(__dirname, 'images')));
+
+//la route pour l'authentification
 app.use("/api/auth", userRoutes);
+
+//la route pour les sauces
 app.use("/api/sauces", saucesRoutes);
 
 //exportation de l'application

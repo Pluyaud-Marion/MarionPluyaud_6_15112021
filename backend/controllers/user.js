@@ -20,17 +20,17 @@ exports.signup = (req, res, next) => {
     const emailCryptoJs = cryptojs.HmacSHA256(req.body.email, `${process.env.CRYPTOJS_EMAIL}`).toString();
 
     bcrypt.hash(req.body.password, 10)
-    .then((hash) => {
+    .then(hash => {
         const user = new User ({
-        email : emailCryptoJs,
-        password : hash
-    });
-    user
-    .save()
-    .then(() => res.status(201).json({ message : 'Utilisateur créé et sauvegardé'}))
-    .catch((error) => res.status(500).json({error}));
+            email : emailCryptoJs,
+            //email : req.body.email,
+            password : hash
+        });
+        user.save()
+        .then(() => res.status(201).json({ message : 'Utilisateur créé et sauvegardé'}))
+        .catch(error => res.status(400).json({error}));
     })
-    .catch((error) => res.status(500).json({error}));
+    .catch(error => res.status(500).json({error}));
 };
 
 //fonction login (+création middleware authentification)
@@ -40,18 +40,19 @@ exports.login = (req, res, next) => {
 
     //chercher dans la db si utilisateur est présent et retourne promesse
     User.findOne({email : emailCryptoJs})
+    //User.findOne({email : req.body.email})
+
     //si le mail de l'user n'est pas présent -> il n'existe pas dans la base
-    .then((user) => {
-        if(user === false){
+    .then(user => {
+        if(!user){
             return res.status(401).json({error : "utilisateur inexistant"})
         }
 
     //controler la validité du password
-    bcrypt
-        .compare(req.body.password, user.password) // compare chaine de caractère en clair avec la chaine hashée
-        .then((verifPassword) => { 
+    bcrypt.compare(req.body.password, user.password) // compare chaine de caractère en clair avec la chaine hashée
+        .then(verifPassword => { 
             //si mot de passe incorrect (si renvoi false)
-            if (verifPassword === false){
+            if (!verifPassword){
                 return res.status(401).json({error : "Le mot de passe est incorrect"})
             }else { // si mot de pass correct -> envoi dans la response du serveur de l'user id + du token
                 res.status(200).json({ 
@@ -59,13 +60,13 @@ exports.login = (req, res, next) => {
                     userId : user._id, //_id contenu dans user précédent
                     token : jwt.sign( // 3 arguments
                         {userId : user._id},
-                        `${process.env.KEY_TOKEN}$`,
-                        {expiresIn: "12h"}
+                        `${process.env.KEY_TOKEN}`,
+                        {expiresIn: "24h"}
                     )
-                })
+                });
             }
         })
-        .catch((error) => res.status(500).json({error}))
+        .catch(error => res.status(500).json({error}));
     })
-    .catch((error) => res.status(500).json({error}));
+    .catch(error => res.status(500).json({error}));
 };
