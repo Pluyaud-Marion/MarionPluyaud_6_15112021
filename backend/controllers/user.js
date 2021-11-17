@@ -6,7 +6,7 @@ const cryptojs = require('crypto-js');
 
 //importation dotenv
 const dotenv = require('dotenv');
-const result = dotenv.config();
+dotenv.config();
 
 //importation jsonwebtoken pour générer le token
 const jwt = require('jsonwebtoken');
@@ -14,7 +14,10 @@ const jwt = require('jsonwebtoken');
 //importation du modèle User
 const User = require('../models/User');
 
-//fonction signup
+/*
+fonction signup 
+--> chiffre email + hash password + ajoute l'user à db
+*/
 exports.signup = (req, res, next) => {
     //chiffrer l'email avant de l'envoyer dans la base de données
     const emailCryptoJs = cryptojs.HmacSHA256(req.body.email, `${process.env.CRYPTOJS_EMAIL}`).toString();
@@ -33,14 +36,20 @@ exports.signup = (req, res, next) => {
     .catch(error => res.status(500).json({error}));
 };
 
-//fonction login (+création middleware authentification)
+/*
+fonction login
+->chiffre email de la requête et cherche si existe dans les emails chiffrés de la db
+->si email non existant = erreur
+->si email existant = compare avec bcrypt string du password avec db
+->si password KO = erreur
+->si password OK = renvoi l'userId contenu dans db + un token qui comprend userid / clé chiffrement / expiration 24h
+*/
 exports.login = (req, res, next) => {
     //chiffrer email de la requête pour comparaison avec db
     const emailCryptoJs = cryptojs.HmacSHA256(req.body.email, `${process.env.CRYPTOJS_EMAIL}`).toString();
 
     //chercher dans la db si utilisateur est présent et retourne promesse
     User.findOne({email : emailCryptoJs})
-    //User.findOne({email : req.body.email})
 
     //si le mail de l'user n'est pas présent -> il n'existe pas dans la base
     .then(user => {

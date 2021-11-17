@@ -2,7 +2,7 @@ const http = require('http');
 
 //importation du package des variables d'environnement
 const dotenv = require('dotenv');
-const result = dotenv.config();
+dotenv.config();
 
 //importation de l'application
 const app = require('./app');

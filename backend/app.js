@@ -7,6 +7,9 @@ const mongoose = require('mongoose');
 //importation path qui donne le chemin
 const path = require('path');
 
+//importation helmet
+const helmet = require('helmet');
+
 //importation userRoutes
 const userRoutes = require('./routes/user');
 
@@ -33,6 +36,9 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
     next();
 });
+
+//configuration helmet
+app.use(helmet());
 
 //middleware qui répond aux requêtes envoyées à /images et qui sert le dossier static image
 app.use("/images", express.static(path.join(__dirname, 'images')));

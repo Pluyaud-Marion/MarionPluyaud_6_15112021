@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 
 //importation dotenv
 const dotenv = require('dotenv');
-const result = dotenv.config();
+dotenv.config();
 
 
 //exportation du middleware
@@ -14,7 +14,7 @@ module.exports = (req, res, next) => {
       
         //décoder le token avec la clé de chiffrement
         const decodedToken = jwt.verify(token, `${process.env.KEY_TOKEN}`);
-
+        
         //récupérer le userId du token
         const userId = decodedToken.userId;
       
