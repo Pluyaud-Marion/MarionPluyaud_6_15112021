@@ -44,6 +44,7 @@ on récupère l'id de la sauce passé dans la requête + on lui rajoute une clé
 exports.getOneSauce = (req, res, next) => {
     Sauce
     .findOne({ _id : req.params.id})
+    //.findOne({ name : "sauce moutarde"})
     .then(sauce => {
         res.status(200).json(sauce)
         //console.log(sauce);

@@ -11,8 +11,12 @@ dotenv.config();
 //importation jsonwebtoken pour générer le token
 const jwt = require('jsonwebtoken');
 
+//importation http-status
+//const status = require('http-status');
+
 //importation du modèle User
 const User = require('../models/User');
+
 
 /*
 fonction signup 
@@ -26,12 +30,13 @@ exports.signup = (req, res, next) => {
     .then(hash => {
         const user = new User ({
             email : emailCryptoJs,
-            //email : req.body.email,
             password : hash
         });
         user.save()
         .then(() => res.status(201).json({ message : 'Utilisateur créé et sauvegardé'}))
+        //.then(() => res.status(status.CREATED).json({ message : 'Utilisateur créé et sauvegardé'}))
         .catch(error => res.status(400).json({error}));
+        //.catch(error => res.status(status.BAD_REQUEST).json({error}));
     })
     .catch(error => res.status(500).json({error}));
 };
