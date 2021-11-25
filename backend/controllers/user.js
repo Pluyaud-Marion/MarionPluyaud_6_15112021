@@ -12,7 +12,7 @@ dotenv.config();
 const jwt = require('jsonwebtoken');
 
 //importation http-status
-//const status = require('http-status');
+const status = require('http-status');
 
 //importation du modèle User
 const User = require('../models/User');
@@ -25,18 +25,20 @@ fonction signup
 exports.signup = (req, res, next) => {
     //chiffrer l'email avant de l'envoyer dans la base de données
     const emailCryptoJs = cryptojs.HmacSHA256(req.body.email, `${process.env.CRYPTOJS_EMAIL}`).toString();
-
-    bcrypt.hash(req.body.password, 10)
+    const SALT_NUMBER = 10
+    bcrypt.hash(req.body.password, SALT_NUMBER)
     .then(hash => {
         const user = new User ({
             email : emailCryptoJs,
             password : hash
         });
         user.save()
-        .then(() => res.status(201).json({ message : 'Utilisateur créé et sauvegardé'}))
-        //.then(() => res.status(status.CREATED).json({ message : 'Utilisateur créé et sauvegardé'}))
-        .catch(error => res.status(400).json({error}));
-        //.catch(error => res.status(status.BAD_REQUEST).json({error}));
+        .then(() => res.status(status.CREATED).json({ 
+            message : 'Utilisateur créé et sauvegardé',
+            status: status[status.CREATED]
+        }))
+        //.catch(error => res.status(400).json({error}));
+        .catch(error => res.status(status.BAD_REQUEST).json({error}));
     })
     .catch(error => res.status(500).json({error}));
 };
