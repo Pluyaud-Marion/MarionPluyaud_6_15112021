@@ -40,7 +40,7 @@ exports.signup = (req, res, next) => {
         //.catch(error => res.status(400).json({error}));
         .catch(error => res.status(status.BAD_REQUEST).json({error}));
     })
-    .catch(error => res.status(500).json({error}));
+    .catch(error => res.status(status.INTERNAL_SERVER_ERROR).json({error}));
 };
 
 /*
@@ -61,7 +61,7 @@ exports.login = (req, res, next) => {
     //si le mail de l'user n'est pas présent -> il n'existe pas dans la base
     .then(user => {
         if(!user){
-            return res.status(401).json({error : "utilisateur inexistant"})
+            return res.status(status.UNAUTHORIZED).json({error : "utilisateur inexistant"})
         }
 
     //controler la validité du password
@@ -69,9 +69,9 @@ exports.login = (req, res, next) => {
         .then(verifPassword => { 
             //si mot de passe incorrect (si renvoi false)
             if (!verifPassword){
-                return res.status(401).json({error : "Le mot de passe est incorrect"})
+                return res.status(status.UNAUTHORIZED).json({error : "Le mot de passe est incorrect"})
             }else { // si mot de pass correct -> envoi dans la response du serveur de l'user id + du token
-                res.status(200).json({ 
+                res.status(status.OK).json({ 
                     //encodage du userId pour création de nouveaux objets (objets et userId liés)
                     userId : user._id, //_id contenu dans user précédent
                     token : jwt.sign( // 3 arguments
@@ -82,7 +82,7 @@ exports.login = (req, res, next) => {
                 });
             }
         })
-        .catch(error => res.status(500).json({error}));
+        .catch(error => res.status(status.INTERNAL_SERVER_ERROR).json({error}));
     })
-    .catch(error => res.status(500).json({error}));
+    .catch(error => res.status(status.INTERNAL_SERVER_ERROR).json({error}));
 };

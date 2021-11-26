@@ -3,7 +3,9 @@ const Sauce = require('../models/Sauce');
 
 //importation du package fs
 const fs = require('fs');
-const { response } = require('express');
+
+//importation http-status
+const status = require('http-status');
 
 /*
 fonction pour créer une sauce
@@ -24,10 +26,10 @@ exports.createSauce = (req, res, next) => {
     
     if (sauce.userId === res.locals.token.userId){
         sauce.save()
-            .then(() => res.status(201).json({ message: 'Sauce enregistrée !' }))
-            .catch(error => res.status(400).json({ error }))
+            .then(() => res.status(status.CREATED).json({ message: 'Sauce enregistrée !' }))
+            .catch(error => res.status(status.BAD_REQUEST).json({ error }))
     } else {
-        res.status(401).json({error : "userId non valide"})
+        res.status(status.UNAUTHORIZED).json({error : "userId non valide"})
     }
     
 };
@@ -39,9 +41,9 @@ renvoi tableau avec toutes les sauces
 exports.getAllSauces = (req, res, next) => {
     Sauce.find()
     .then((allSauces) => {
-        res.status(200).json(allSauces)
+        res.status(status.OK).json(allSauces)
     })
-    .catch(error => res.status(400).json({error}))
+    .catch(error => res.status(status.BAD_REQUEST).json({error}))
     
 };
 
@@ -53,9 +55,9 @@ exports.getOneSauce = (req, res, next) => {
     Sauce
     .findOne({ _id : req.params.id})
     .then(sauce => {
-        res.status(200).json(sauce)
+        res.status(status.CREATED).json(sauce)
     })
-    .catch(error => res.status(404).json({error}))
+    .catch(error => res.status(status.NOT_FOUND).json({error}))
 };
 
 /*
@@ -77,10 +79,10 @@ exports.updateSauce = (req, res, next) => {
         
         Sauce
         .updateOne({ _id : req.params.id}, {...sauceObject, _id : req.params.id})
-        .then(() => res.status(200).json({message : 'La sauce a été modifiée'}))
-        .catch(error => res.status(400).json({error}))
+        .then(() => res.status(status.OK).json({message : 'La sauce a été modifiée'}))
+        .catch(error => res.status(status.BAD_REQUEST).json({error}))
     } else {
-        res.status(401).json({ error : "Pas d'autorisation pour modifier cette sauce"})
+        res.status(status.UNAUTHORIZED).json({ error : "Pas d'autorisation pour modifier cette sauce"})
 
     }
 };
@@ -103,14 +105,14 @@ exports.deleteSauce = (req, res, next) => {
             //fs.unlink supprime l'image de la base de données
             fs.unlink(`images/${filename}`, () => {
                 Sauce.deleteOne({_id : req.params.id}) //supprime sauce par son id de la base de données
-                .then(() => res.status(200).json({message : 'La sauce a été supprimée'}))
-                .catch(error => res.status(400).json({error}));
+                .then(() => res.status(status.OK).json({message : 'La sauce a été supprimée'}))
+                .catch(error => res.status(status.BAD_REQUEST).json({error}));
             });
         } else {
-            res.status(401).json({ error : "Pas d'autorisation pour supprimer cette sauce"})
+            res.status(status.UNAUTHORIZED).json({ error : "Pas d'autorisation pour supprimer cette sauce"})
         }
     })
-    .catch(error => res.status(500).json({error}));
+    .catch(error => res.status(status.INTERNAL_SERVER_ERROR).json({error}));
 };
 
 exports.likes = (req, res, next) => {
@@ -146,21 +148,21 @@ exports.likes = (req, res, next) => {
                 if(sauce.usersLiked.includes(userId)) {
                     //on retire son like du tableau et on décrémente
                     Sauce.updateOne({ _id : sauceId}, deleteLike)
-                    .then(() => res.status(201).json({message : "Like annulé"}))
-                    .catch(error => res.status(400).json({error}))
+                    .then(() => res.status(status.CREATED).json({message : "Like annulé"}))
+                    .catch(error => res.status(status.BAD_REQUEST).json({error}))
                 //s'il veut liker alors qu'il est déjà dans le tableau des dislikes
                 } else if(sauce.usersDisliked.includes(userId)){
-                    return res.status(400).json({ message : "Annulez d'abord votre dislike"})
+                    return res.status(status.BAD_REQUEST).json({ message : "Annulez d'abord votre dislike"})
 
                 // s'il n'a pas déjà liké ni disliké
                 } else { 
                     Sauce.updateOne({ _id : sauceId}, addLike)
-                    .then(() => res.status(201).json({message : "You Like"}))
-                    .catch(error => res.status(400).json({error}))
+                    .then(() => res.status(status.CREATED).json({message : "You Like"}))
+                    .catch(error => res.status(status.BAD_REQUEST).json({error}))
                 }
             
             })
-            .catch(error => res.status(400).json({error}));
+            .catch(error => res.status(status.BAD_REQUEST).json({error}));
             
         break;
 
@@ -172,19 +174,19 @@ exports.likes = (req, res, next) => {
                     //si l'utilisateur a déjà liké la sauce = on annule son like
                     if(sauce.usersLiked.includes(userId)) {
                         Sauce.updateOne({ _id : sauceId}, deleteLike)
-                        .then(()=>res.status(200).json({ message : 'Like annulé'}))
-                        .catch(error => res.status(400).json(error))
+                        .then(()=>res.status(status.OK).json({ message : 'Like annulé'}))
+                        .catch(error => res.status(status.BAD_REQUEST).json(error))
 
                     //si l'utilisateur a déjà disliké la sauce = on annule son dislike
                     } else if (sauce.usersDisliked.includes(userId)) {
                         Sauce.updateOne({ _id : sauceId}, deleteDislike)
-                        .then(() => res.status(200).json({ message : 'Dislike annulé'}))
-                        .catch(error => res.status(400).json(error))
+                        .then(() => res.status(status.OK).json({ message : 'Dislike annulé'}))
+                        .catch(error => res.status(status.BAD_REQUEST).json(error))
                     } else {
-                        return res.status(400).json({message : "Vous n'avez pas la possibilité de faire ça!"})
+                        return res.status(status.BAD_REQUEST).json({message : "Vous n'avez pas la possibilité de faire ça!"})
                     }
                 })
-                .catch(error => res.status(400).json({error}))
+                .catch(error => res.status(status.BAD_REQUEST).json({error}))
             
         break;
 
@@ -195,30 +197,27 @@ exports.likes = (req, res, next) => {
                 // on retire son dislike du tableau des dislike et on décrémente son dislike (on passe à 0)
                 if(sauce.usersDisliked.includes(userId)) {
                     Sauce.updateOne({ _id : sauceId}, deleteDislike)
-                    .then(() => res.status(201).json({message : "Dislike annulé"}))
-                    .catch(error => res.status(400).json({error}))
+                    .then(() => res.status(status.CREATED).json({message : "Dislike annulé"}))
+                    .catch(error => res.status(status.BAD_REQUEST).json({error}))
 
                 //s'il est déjà dans le tableau des likes et qu'il veut disliké 
                 } else if(sauce.usersLiked.includes(userId)){
-                    return res.status(400).json({ message : "Annulez d'abord votre like"})
+                    return res.status(status.BAD_REQUEST).json({ message : "Annulez d'abord votre like"})
 
                 //s'il n'a pas déjà disliké -> il peut le faire
                 } else {
                     Sauce.updateOne({ _id : sauceId}, addDislike)
-                    .then(() => res.status(201).json({message : "You Dislike"}))
-                    .catch(error => res.status(400).json(error))
+                    .then(() => res.status(status.CREATED).json({message : "You Dislike"}))
+                    .catch(error => res.status(status.BAD_REQUEST).json(error))
                 }
             })
         
-            .catch(error => res.status(400).json({error}))
+            .catch(error => res.status(status.BAD_REQUEST).json({error}))
             //return res.status(400).json({message : "Vous n'avez pas la possibilité de faire ça!"})
         break;
-
+// CAS TRAITE POUR POSTMAN -> si l'utilisateur fait autre chose que like : 1 / 0 / -1
         default:
-            return res.status(400).json({message : "Vous n'avez pas la possibilité de faire ça!"})
-    // CAS TRAITE POUR POSTMAN -> si l'utilisateur fait autre chose que like : 1 / 0 / -1
-    // } else {
-    //     return res.status(400).json({message : "Vous n'avez pas la possibilité de faire ça!"})
-    // }
+            return res.status(status.BAD_REQUEST).json({message : "Vous n'avez pas la possibilité de faire ça!"})
+
     }
 };

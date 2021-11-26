@@ -5,6 +5,8 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 dotenv.config();
 
+//importation http-status
+const status = require('http-status');
 
 module.exports = (req, res, next) => {
     try{
@@ -21,7 +23,7 @@ module.exports = (req, res, next) => {
             next()
         }
     }catch{
-        res.status(401).json({ 
+        res.status(status.UNAUTHORIZED).json({ 
             error : new Error ('Requête non authentifié')
         });
     }
