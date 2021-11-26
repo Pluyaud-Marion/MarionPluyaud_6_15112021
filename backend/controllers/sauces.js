@@ -164,6 +164,8 @@ exports.likes = (req, res, next) => {
             
         break;
 
+        //si l'utilisateur reclique sur like ou dislike 
+        //CAS TRAITE POUR POSTMAN SI like : 0
         case 0 : 
             Sauce.findOne({ _id : sauceId}) //on cherche la sauce qui a le params.id contenu dans la requête
                 .then(sauce =>{
@@ -209,8 +211,11 @@ exports.likes = (req, res, next) => {
             })
         
             .catch(error => res.status(400).json({error}))
-            return res.status(400).json({message : "Vous n'avez pas la possibilité de faire ça!"})
+            //return res.status(400).json({message : "Vous n'avez pas la possibilité de faire ça!"})
+        break;
 
+        default:
+            return res.status(400).json({message : "Vous n'avez pas la possibilité de faire ça!"})
     // CAS TRAITE POUR POSTMAN -> si l'utilisateur fait autre chose que like : 1 / 0 / -1
     // } else {
     //     return res.status(400).json({message : "Vous n'avez pas la possibilité de faire ça!"})
