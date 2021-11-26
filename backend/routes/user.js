@@ -16,7 +16,7 @@ const router = express.Router();
 router.post("/signup", password, userController.signup);
 
 //route login
-router.post("/login", limiter, userController.login);
+router.post("/login", limiter.loginLimiter, userController.login);
 
 //exportation du module
 module.exports = router;
