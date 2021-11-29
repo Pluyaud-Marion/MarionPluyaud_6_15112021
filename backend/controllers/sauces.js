@@ -144,12 +144,13 @@ exports.likes = (req, res, next) => {
         case 1:
             Sauce.findOne({ _id : sauceId})
             .then(sauce =>{
-            //on vérifie si l'userId était déjà dans le tableau usersLiked = si oui -> il veut liker 2 fois
+                //on vérifie si l'userId était déjà dans le tableau usersLiked = si oui -> il veut liker 2 fois
                 if(sauce.usersLiked.includes(userId)) {
                     //on retire son like du tableau et on décrémente
                     Sauce.updateOne({ _id : sauceId}, deleteLike)
                     .then(() => res.status(status.CREATED).json({message : "Like annulé"}))
                     .catch(error => res.status(status.BAD_REQUEST).json({error}))
+
                 //s'il veut liker alors qu'il est déjà dans le tableau des dislikes
                 } else if(sauce.usersDisliked.includes(userId)){
                     return res.status(status.BAD_REQUEST).json({ message : "Annulez d'abord votre dislike"})
@@ -160,10 +161,10 @@ exports.likes = (req, res, next) => {
                     .then(() => res.status(status.CREATED).json({message : "You Like"}))
                     .catch(error => res.status(status.BAD_REQUEST).json({error}))
                 }
-            
+
             })
             .catch(error => res.status(status.BAD_REQUEST).json({error}));
-            
+          
         break;
 
         //si l'utilisateur reclique sur like ou dislike 
@@ -187,20 +188,21 @@ exports.likes = (req, res, next) => {
                     }
                 })
                 .catch(error => res.status(status.BAD_REQUEST).json({error}))
-            
+              
         break;
 
         case -1:
             Sauce.findOne({_id : sauceId})
             .then(sauce =>{
                 // on vérifie s'il est déjà ds tableau des dislikes : si oui il veut disliker 2 fois
-                // on retire son dislike du tableau des dislike et on décrémente son dislike (on passe à 0)
+                // on retire son dislike du tableau et on décrémente(on passe à 0)
                 if(sauce.usersDisliked.includes(userId)) {
                     Sauce.updateOne({ _id : sauceId}, deleteDislike)
                     .then(() => res.status(status.CREATED).json({message : "Dislike annulé"}))
                     .catch(error => res.status(status.BAD_REQUEST).json({error}))
+                    
 
-                //s'il est déjà dans le tableau des likes et qu'il veut disliké 
+                //s'il est déjà dans le tableau des likes et qu'il veut disliker
                 } else if(sauce.usersLiked.includes(userId)){
                     return res.status(status.BAD_REQUEST).json({ message : "Annulez d'abord votre like"})
 
@@ -211,13 +213,11 @@ exports.likes = (req, res, next) => {
                     .catch(error => res.status(status.BAD_REQUEST).json(error))
                 }
             })
-        
             .catch(error => res.status(status.BAD_REQUEST).json({error}))
-            //return res.status(400).json({message : "Vous n'avez pas la possibilité de faire ça!"})
+           
         break;
-// CAS TRAITE POUR POSTMAN -> si l'utilisateur fait autre chose que like : 1 / 0 / -1
+        // CAS TRAITE POUR POSTMAN -> si l'utilisateur fait autre chose que like : 1 / 0 / -1
         default:
             return res.status(status.BAD_REQUEST).json({message : "Vous n'avez pas la possibilité de faire ça!"})
-
     }
 };

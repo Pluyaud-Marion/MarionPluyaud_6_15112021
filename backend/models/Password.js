@@ -12,7 +12,6 @@ schemaPassword
 .has().not().spaces()          // Pas d'espaces
 .has().symbols()                // impose symbole
 .has().not().symbols(2)          // max 2 symboles
-.is().not().oneOf(['Passw0rd', 'Password123', 'azerty', '123']); // password interdits
 
 //exportation du schéma -> importé dans middleware/password
 module.exports = schemaPassword;

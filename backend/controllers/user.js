@@ -33,11 +33,7 @@ exports.signup = (req, res, next) => {
             password : hash
         });
         user.save()
-        .then(() => res.status(status.CREATED).json({ 
-            message : 'Utilisateur créé et sauvegardé',
-            status: status[status.CREATED]
-        }))
-        //.catch(error => res.status(400).json({error}));
+        .then(() => res.status(status.CREATED).json({message : 'Utilisateur créé et sauvegardé'}))
         .catch(error => res.status(status.BAD_REQUEST).json({error}));
     })
     .catch(error => res.status(status.INTERNAL_SERVER_ERROR).json({error}));
@@ -64,25 +60,25 @@ exports.login = (req, res, next) => {
             return res.status(status.UNAUTHORIZED).json({error : "utilisateur inexistant"})
         }
 
-    //controler la validité du password
-    bcrypt.compare(req.body.password, user.password) // compare chaine de caractère en clair avec la chaine hashée
-        .then(verifPassword => { 
-            //si mot de passe incorrect (si renvoi false)
-            if (!verifPassword){
-                return res.status(status.UNAUTHORIZED).json({error : "Le mot de passe est incorrect"})
-            }else { // si mot de pass correct -> envoi dans la response du serveur de l'user id + du token
-                res.status(status.OK).json({ 
-                    //encodage du userId pour création de nouveaux objets (objets et userId liés)
-                    userId : user._id, //_id contenu dans user précédent
-                    token : jwt.sign( // 3 arguments
-                        {userId : user._id}, // payload
-                        `${process.env.KEY_TOKEN}`,
-                        {expiresIn: "24h"}
-                    )
-                });
-            }
-        })
-        .catch(error => res.status(status.INTERNAL_SERVER_ERROR).json({error}));
+        //controler la validité du password
+        bcrypt.compare(req.body.password, user.password) // compare chaine de caractère en clair avec la chaine hashée
+            .then(verifPassword => { 
+                //si mot de passe incorrect (si renvoi false)
+                if (!verifPassword){
+                    return res.status(status.UNAUTHORIZED).json({error : "Le mot de passe est incorrect"})
+                }else { // si mot de pass correct -> envoi dans la response du serveur de l'user id + du token
+                    res.status(status.OK).json({ 
+                        //encodage du userId pour création de nouveaux objets (objets et userId liés)
+                        userId : user._id, //_id contenu dans user précédent
+                        token : jwt.sign( // 3 arguments
+                            {userId : user._id}, // payload
+                            `${process.env.KEY_TOKEN}`,
+                            {expiresIn: "24h"}
+                        )
+                    });
+                }
+            })
+            .catch(error => res.status(status.INTERNAL_SERVER_ERROR).json({error}));
     })
     .catch(error => res.status(status.INTERNAL_SERVER_ERROR).json({error}));
 };
