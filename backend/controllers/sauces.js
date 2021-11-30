@@ -15,16 +15,18 @@ sauce.userId = l'userId contenu dans l'objet à créer
 res.locals.token.userId = userId contenu dans le token de la requête (déchiffré)
 */
 exports.createSauce = (req, res, next) => { 
-
+    //transforme les infos de la requête en objet JS
     const sauceObject = JSON.parse(req.body.sauce);
     
     const sauce = new Sauce({
         //copie les champs dans le corps de la requête et les met dans l'instance sauce
+        //confifure l'url de l'image
         ...sauceObject,
         imageUrl : `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
     });
     
     if (sauce.userId === res.locals.token.userId){
+        //si authentification ok = enregistrement de la sauce dans la base de données mongoDB
         sauce.save()
             .then(() => res.status(status.CREATED).json({ message: 'Sauce enregistrée !' }))
             .catch(error => res.status(status.BAD_REQUEST).json({ error }))
@@ -62,14 +64,16 @@ exports.getOneSauce = (req, res, next) => {
 
 /*
 fonction qui met à jour la sauce avec _id fourni
--Si un fichier est présent -> on met à jour imageUrl et on prend les infos de la sauce dans req.body.sauce
--Si aucun fichier présent -> on prend les infos de la sauce dans le corps de la requete
 Condition pour vérifier = 
 sauceObject.userId = l'id de celui qui a créé la sauce
 res.locals.token.userId = id de celui qui veut modifier
+Mise à jour de la base de données avec updateOne
 */
 exports.updateSauce = (req, res, next) => {
+    //opérateur ternaire = fichier image envoyé avec la requête ou non?
     const sauceObject = req.file ?
+    //si oui : on copie les champs du corps de la requête et on transforme en objet JS + configuration url de l'image
+    //si non : on traite les champs du corps de la requête
     {
         ...JSON.parse(req.body.sauce),
         imageUrl : `${req.protocol}://${req.get('host')}/images/${req.file.filename}` 
@@ -78,6 +82,7 @@ exports.updateSauce = (req, res, next) => {
     if (sauceObject.userId === res.locals.token.userId){
         
         Sauce
+        //argument 1 : sauce selectionnée (id envoyé avec la requête) / argument 2 : version mise à jour de cette sauce
         .updateOne({ _id : req.params.id}, {...sauceObject, _id : req.params.id})
         .then(() => res.status(status.OK).json({message : 'La sauce a été modifiée'}))
         .catch(error => res.status(status.BAD_REQUEST).json({error}))
@@ -99,9 +104,9 @@ exports.deleteSauce = (req, res, next) => {
     Sauce.findOne({ _id: req.params.id })
     .then(sauce => {
         if(sauce.userId === res.locals.token.userId){
-      
             //récupération du nom du fichier à supprimer et split retourne tableau avec avant / après image -> on prend le chemin après
             const filename = sauce.imageUrl.split('/images/')[1];
+            
             //fs.unlink supprime l'image de la base de données
             fs.unlink(`images/${filename}`, () => {
                 Sauce.deleteOne({_id : req.params.id}) //supprime sauce par son id de la base de données

@@ -27,6 +27,7 @@ router.put('/:id', authentification, limiter.appliLimiter, multer, saucesControl
 //DELETE
 router.delete('/:id', authentification, limiter.appliLimiter, saucesController.deleteSauce);
 
+//route post pour gestion des likes
 router.post('/:id/like', authentification, limiter.appliLimiter, saucesController.likes);
 
 
