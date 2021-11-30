@@ -8,7 +8,7 @@ dotenv.config();
 //importation node-mailer
 const nodemailer = require('nodemailer');
 
-
+//paramétrage du transporter
 const transporter = nodemailer.createTransport({
         host : process.env.SMTPPATH,
         port : 465,
@@ -18,14 +18,14 @@ const transporter = nodemailer.createTransport({
                 pass: process.env.EMAILPASSWORD,
         },
 });
-
+//paramétrage pour le dépassement de requête sur l'API globale
 const appliFullRequest = {
         from : process.env.EMAILENVOI,
         to : process.env.EMAILDESTINATAIRE,
         subject : "Attention danger sur l'application",
         text : "Un utilisateur a effectué 50 requêtes en 15min sur l'application, il y a danger pour la sécurité de l'application"
 };
-
+//paramétrage pour le dépassement de requête sur le login
 const loginFullRequest = {
         from : process.env.EMAILENVOI,
         to : process.env.EMAILDESTINATAIRE,
@@ -47,7 +47,7 @@ exports.loginLimiter =  rateLimit({
 
 exports.appliLimiter =  rateLimit({
         windowMs : 15 * 60 * 1000,
-        max : 2, 
+        max : 50, 
         message : "Vous avez effectué trop de requêtes",
 
         //fonction appelée dès que limite atteinte
